@@ -10,7 +10,7 @@ class Auth:
     """ Initialization of Auth class
     """
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """ Function that handle routes 
+        """ Function that handle routes
         that require authentication
         Parameters:
             path: str, allowed for athentication
@@ -46,6 +46,7 @@ class Auth:
         if header is None:
             return None
         return header
+
     def current_user(self, request=None) -> TypeVar('User'):
         """ Function that retrieves current user
         Parameters:
