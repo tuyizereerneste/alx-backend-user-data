@@ -6,6 +6,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import InvalidRequestError
 
 from user import Base
 from user import User
@@ -45,3 +47,40 @@ class DB:
         self._session.add(user)
         self._session.commit()
         return user
+
+    def find_user_by(self, **kwargs) -> User:
+        """
+        Method the find a user whose attribute is matching the argument
+        Parameters:
+            attributes
+        Return:
+            user or error
+        """
+        all_users = self._session.query(User)
+        for k, v in kwargs.items():
+            if k not in User.__dict__:
+                raise InvalidRequestError
+            for u in all_users:
+                if getattr(u, k) == v:
+                    return u
+        raise NoResultFound
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """
+        Method to update the user attributes
+        Parameters:
+            user_id(int): user's id to update
+            attributes to update
+        Return:
+            None
+        """
+        try:
+            u = self.find_user_by(id=user_id)
+        except NoResultFound:
+            raise ValueError()
+        for k, v in kwargs.items():
+            if hasattr(u, k):
+                setattr(u, k, v)
+            else:
+                raise ValueError
+        self._session.commit()
